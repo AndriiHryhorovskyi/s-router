@@ -5,18 +5,23 @@ const regexparam = require("regexparam");
 const router = new Map();
 const rxCollectionName = "rx";
 const directCollectionName = "direct";
+const methods = [
+  "GET",
+  "HEAD",
+  "PATCH",
+  "OPTIONS",
+  "CONNECT",
+  "DELETE",
+  "TRACE",
+  "POST",
+  "PUT"
+];
 
 class Router {
   constructor() {
-    this.get = this.add.bind(this, "GET");
-    this.head = this.add.bind(this, "HEAD");
-    this.patch = this.add.bind(this, "PATCH");
-    this.options = this.add.bind(this, "OPTIONS");
-    this.connect = this.add.bind(this, "CONNECT");
-    this.delete = this.add.bind(this, "DELETE");
-    this.trace = this.add.bind(this, "TRACE");
-    this.post = this.add.bind(this, "POST");
-    this.put = this.add.bind(this, "PUT");
+    methods.forEach(
+      method => (this[method.toLowerCase()] = this.add.bind(this, method))
+    );
   }
 
   add(method, path, handler) {
@@ -53,14 +58,14 @@ class Router {
   }
 
   find(method, path) {
-    const resultObj = { handler: undefined, params: {} };
+    const resultObj = { handler: null, params: {} };
     const mtd = router.get(method);
     if (!mtd) return resultObj;
 
     const directCollection = mtd.get(directCollectionName);
     const directHandler = directCollection
       ? directCollection.get(path)
-      : undefined;
+      : null;
     if (directHandler) {
       resultObj.handler = directHandler;
       return resultObj;
