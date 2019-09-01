@@ -49,23 +49,23 @@ class Router {
         : (methodCollection.set(rxCollectionName, []),
           methodCollection.get(rxCollectionName).push(routeComponents));
     } else {
+      const directPath = path.endsWith("/") ? path.slice(0, -1) : path;
       const directCollection = methodCollection.get("direct");
       directCollection
-        ? directCollection.set(path, handler)
+        ? directCollection.set(directPath, handler)
         : (methodCollection.set(directCollectionName, new Map()),
-          methodCollection.get(directCollectionName).set(path, handler));
+          methodCollection.get(directCollectionName).set(directPath, handler));
     }
   }
 
   find(method, path) {
+    if (path.endsWith("/")) path = path.slice(0, -1);
     const resultObj = { handler: null, params: {} };
     const mtd = router.get(method);
     if (!mtd) return resultObj;
 
     const directCollection = mtd.get(directCollectionName);
-    const directHandler = directCollection
-      ? directCollection.get(path)
-      : null;
+    const directHandler = directCollection ? directCollection.get(path) : null;
     if (directHandler) {
       resultObj.handler = directHandler;
       return resultObj;
