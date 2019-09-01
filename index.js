@@ -20,7 +20,8 @@ class Router {
   }
 
   add(method, path, handler) {
-    const isValidPath = typeof path === "string" || path instanceof RegExp;
+    const isRegExpInstance = path instanceof RegExp;
+    const isValidPath = typeof path === "string" || isRegExpInstance;
     if (!isValidPath)
       return new Error("Invalid param! 'path' must be a String or RegExp");
     if (typeof handler !== "function")
@@ -29,9 +30,9 @@ class Router {
     const methodCollection =
       router.get(method) || (router.set(method, new Map()), router.get(method));
 
-    // RegExp specific symbols
-    const rx = /[\:\*\?\|\\\(\)\+\^\$\[\]]/;
-    const isRegExp = path.toString().search(rx) !== -1;
+    // regexparam pathing operators
+    const rx = /[\:\*\?\|\(\)]/;
+    const isRegExp = isRegExpInstance || path.search(rx) !== -1;
 
     if (isRegExp) {
       const rxCollection = methodCollection.get(rxCollectionName);
