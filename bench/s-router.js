@@ -21,7 +21,10 @@ http
 function handleRequest(req, res) {
   const { pathname } = url.parse(req.url, true);
   const { handler } = router.find(req.method, pathname);
-  if (!handler) return res.writeHead(404).end();
+  if (!handler) {
+    res.statusCode = 404;
+    return res.end();
+  }
   const data = handler();
   res.writeHead(200, { "Content-Length": `${data.length}` });
   return res.end(data);
