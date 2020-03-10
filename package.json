@@ -23,10 +23,10 @@
     "regexparam": "^1.3.0"
   },
   "devDependencies": {
-    "express": "^4.17.1",
-    "fastify": "^2.6.0",
-    "jest": "^24.8.0",
-    "restify": "^8.3.3"
+    "express": "latest",
+    "fastify": "latest",
+    "jest": "latest",
+    "restify": "latest"
   },
   "jest": {
     "testEnvironment": "node"
