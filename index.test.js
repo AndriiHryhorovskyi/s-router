@@ -1,55 +1,53 @@
+const assert = require("assert").strict;
 const router = require("./index");
 
-describe("router", () => {
-  beforeAll(() => {
-    router.get("/users", () => "list of users");
-    router.get("/users/:id/:s?", () => "some user");
-    router.get(/^\/$/, () => "index.html");
-    router.patch(
-      /^[/]users[/](?<id>\d+)[/]books[/](?<title>[^/]+)[/]?$/,
-      () => "patched"
-    );
-  });
+router.get("/users", () => "list of users");
+router.get("/users/:id/:s?", () => "some user");
+router.get(/^\/$/, () => "index.html");
+router.patch(
+  /^[/]users[/](?<id>\d+)[/]books[/](?<title>[^/]+)[/]?$/,
+  () => "patched",
+);
 
-  test("should return 'list of users' params and handler", () => {
-    const { handler, params } = router.find("GET", "/users");
-    expect(handler()).toBe("list of users");
+const tests = [
+  {
+    args: ["GET", "/users"],
+    expected: { result: "list of users", params: {} },
+    name: "direct path",
+  },
+  {
+    args: ["GET", "/users/1"],
+    expected: { result: "some user", params: { id: 1 } },
+    name: "path with unused optional paramater",
+  },
+  {
+    args: ["GET", "/users/1/a"],
+    expected: { result: "some user", params: { id: 1, s: "a" } },
+    name: "path with optional parameter",
+  },
+  {
+    args: ["GET", "/"],
+    expected: { result: "index.html", params: {} },
+    name: "RegExp path",
+  },
+  {
+    args: ["PATCH", "/users/456/books/1"],
+    expected: { result: "patched", params: { id: 456, title: 1 } },
+    name: "RegExp path with parameters",
+  },
+];
 
-    expect(params).toBeInstanceOf(Object);
-    expect(Object.keys(params).length).toBe(0);
-  });
+for (const test of tests) {
+  const { args, expected, name } = test;
+  const { handler, params } = router.find(...args);
+  const result = handler();
+  const errorMsg = `Error in test '${name}'`;
 
-  test(`should return 'some user'`, () => {
-    const { handler, params } = router.find("GET", "/users/1");
-    expect(handler()).toBe("some user");
-
-    expect(params).toEqual({
-      id: 1
-    });
-  });
-
-  test("should return index.html params and handler", () => {
-    const { handler, params } = router.find("GET", "/");
-    expect(handler()).toBe("index.html");
-
-    expect(params).toBeInstanceOf(Object);
-    expect(Object.keys(params).length).toBe(0);
-  });
-
-  test("custom RegExp should work fine", () => {
-    const { handler, params } = router.find("PATCH", "/users/456/books/1");
-    expect(handler()).toBe("patched");
-
-    expect(params).toBeInstanceOf(Object);
-    expect(params).toEqual({ id: 456, title: 1 });
-  });
-
-  test("should return undefined handler and empty params object", () => {
-    const result = router.find("GET", "/test/path");
-
-    expect(result).toEqual({
-      handler: null,
-      params: {}
-    });
-  });
-});
+  try {
+    assert.strictEqual(result, expected.result, errorMsg);
+    assert.deepStrictEqual(params, expected.params, errorMsg);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+}

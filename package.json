@@ -4,8 +4,7 @@
   "description": "Simple, non midlware-style http router",
   "main": "index.js",
   "scripts": {
-    "test": "jest index.test.js",
-    "start": "node server.js",
+    "test": "node index.test.js && echo 'All tests passed'",
     "bench": "./bench/run.sh"
   },
   "keywords": [
@@ -25,7 +24,6 @@
   "devDependencies": {
     "express": "latest",
     "fastify": "latest",
-    "jest": "latest",
     "restify": "latest"
   },
   "jest": {
