@@ -49,7 +49,7 @@ class Router {
         : (methodCollection.set(rxCollectionName, []),
           methodCollection.get(rxCollectionName).push(routeComponents));
     } else {
-      const directPath = path.endsWith("/") ? path.slice(0, -1) : path;
+      const directPath = path.endsWith("/") && path.lenght>1 ? path.slice(0, -1) : path;
       const directCollection = methodCollection.get("direct");
       directCollection
         ? directCollection.set(directPath, handler)
@@ -59,7 +59,7 @@ class Router {
   }
 
   find(method, path) {
-    if (path.endsWith("/")) path = path.slice(0, -1);
+    if (path.endsWith("/") && path.length>1) path = path.slice(0, -1);
     const resultObj = { handler: null, params: {} };
     const mtd = router.get(method);
     if (!mtd) return resultObj;

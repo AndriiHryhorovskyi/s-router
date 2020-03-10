@@ -48,7 +48,7 @@ describe("router", () => {
     const result = router.find("GET", "/test/path");
 
     expect(result).toEqual({
-      handler: undefined,
+      handler: null,
       params: {}
     });
   });
