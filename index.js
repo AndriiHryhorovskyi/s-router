@@ -2,7 +2,6 @@
 
 const regexparam = require("regexparam");
 
-const router = new Map();
 const rxCollectionName = "rx";
 const directCollectionName = "direct";
 const methods = [
@@ -14,13 +13,14 @@ const methods = [
   "DELETE",
   "TRACE",
   "POST",
-  "PUT"
+  "PUT",
 ];
 
 class Router {
+  #router = new Map();
   constructor() {
     methods.forEach(
-      method => (this[method.toLowerCase()] = this.add.bind(this, method))
+      method => (this[method.toLowerCase()] = this.add.bind(this, method)),
     );
   }
 
@@ -33,35 +33,38 @@ class Router {
       return new Error(`Invalid param! 'handler' must be a function`);
 
     const methodCollection =
-      router.get(method) || (router.set(method, new Map()), router.get(method));
+      this.#router.get(method) ||
+      (this.#router.set(method, new Map()), this.#router.get(method));
 
     // regexparam pathing operators
     const rx = /[\:\*\?\|\(\)]/;
     const isRegExp = isRegExpInstance || path.search(rx) !== -1;
 
     if (isRegExp) {
-      const rxCollection = methodCollection.get(rxCollectionName);
+      const rxCollection =
+        methodCollection.get(rxCollectionName) ||
+        (methodCollection.set(rxCollectionName, []),
+        methodCollection.get(rxCollectionName));
       const { pattern, keys } = regexparam(path);
       const routeComponents = [pattern, handler, keys || []];
 
-      rxCollection
-        ? rxCollection.push(routeComponents)
-        : (methodCollection.set(rxCollectionName, []),
-          methodCollection.get(rxCollectionName).push(routeComponents));
+      rxCollection.push(routeComponents);
     } else {
-      const directPath = path.endsWith("/") && path.lenght>1 ? path.slice(0, -1) : path;
-      const directCollection = methodCollection.get("direct");
-      directCollection
-        ? directCollection.set(directPath, handler)
-        : (methodCollection.set(directCollectionName, new Map()),
-          methodCollection.get(directCollectionName).set(directPath, handler));
+      const directPath =
+        path.endsWith("/") && path.lenght > 1 ? path.slice(0, -1) : path;
+      const directCollection =
+        methodCollection.get(directCollectionName) ||
+        (methodCollection.set(directCollectionName, new Map()),
+        methodCollection.get(directCollectionName));
+
+      directCollection.set(directPath, handler);
     }
   }
 
   find(method, path) {
-    if (path.endsWith("/") && path.length>1) path = path.slice(0, -1);
+    if (path.endsWith("/") && path.length > 1) path = path.slice(0, -1);
     const resultObj = { handler: null, params: {} };
-    const mtd = router.get(method);
+    const mtd = this.#router.get(method);
     if (!mtd) return resultObj;
 
     const directCollection = mtd.get(directCollectionName);
@@ -74,7 +77,7 @@ class Router {
     const rxCollection = mtd.get(rxCollectionName);
     if (!rxCollection) return resultObj;
 
-    // routeComponents: [pattern:RegExp, handler:Function, keys:Array]
+    // routeComponents: [pattern::RegExp, handler::Function, keys::Array]
     for (let routeComponents of rxCollection) {
       let matches = path.match(routeComponents[0]);
 
