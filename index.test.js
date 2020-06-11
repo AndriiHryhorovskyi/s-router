@@ -1,5 +1,7 @@
 const assert = require("assert").strict;
-const router = require("./index");
+const Router = require("./index");
+
+const router = new Router();
 
 router.get("/users", () => "list of users");
 router.get("/users/:id/:s?", () => "some user");
