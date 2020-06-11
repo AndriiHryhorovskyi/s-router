@@ -1,6 +1,6 @@
 {
   "name": "s-router",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "Simple, non midlware-style http router",
   "main": "index.js",
   "scripts": {
